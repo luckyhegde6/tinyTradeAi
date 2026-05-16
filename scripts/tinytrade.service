@@ -1,0 +1,21 @@
+[Unit]
+Description=TinyTrade AI - Edge Market Intelligence Terminal
+After=network.target i2c-dev.service
+
+[Service]
+Type=simple
+User=root
+# Change WorkingDirectory to where you clone the repo
+WorkingDirectory=/opt/tinyTradeAi
+# Change ExecStart to the path of your virtual environment python
+ExecStart=/opt/tinyTradeAi/venv/bin/python main.py
+
+Restart=always
+RestartSec=10
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=tinytrade
+
+[Install]
+WantedBy=multi-user.target

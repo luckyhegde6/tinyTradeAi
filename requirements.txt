@@ -1,0 +1,11 @@
+flask==3.0.2
+requests==2.31.0
+python-dotenv==1.0.1
+schedule==1.2.1
+luma.oled==3.13.0
+Pillow==10.2.0
+vaderSentiment==3.3.2
+textblob==0.18.0.post0
+numpy==1.26.4
+# Note: yfinance is intentionally omitted to save memory on 256MB RAM device.
+# We are using direct requests to the NSE India API instead.
