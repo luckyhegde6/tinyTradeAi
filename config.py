@@ -28,11 +28,17 @@ CRYPTO_POLL_INTERVAL = 60
 STOCKS_POLL_INTERVAL = 300  # 5 minutes
 NEWS_POLL_INTERVAL = 900    # 15 minutes
 
-# OLED Configuration
+# OLED Configuration (SSD1306)
 I2C_PORT = 0
 I2C_ADDRESS = 0x3C
 OLED_WIDTH = 128
 OLED_HEIGHT = 64
+
+# LCD Configuration (PCF8574 I2C Backpack 16x2)
+LCD_I2C_PORT = 0
+LCD_I2C_ADDRESS = 0x00  # Set to 0x00 for auto-discovery; known addresses: 0x27, 0x3F
+LCD_COLUMNS = 16
+LCD_ROWS = 2
 
 # Flask API Configuration
 API_HOST = "0.0.0.0"

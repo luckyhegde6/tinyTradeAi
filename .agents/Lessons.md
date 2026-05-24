@@ -17,3 +17,8 @@ This file tracks past mistakes and the rules derived from them to ensure the AI 
 - **Consequence**: After configuring Wi-Fi, the device hangs completely during boot, appearing dead on both serial console and SSH.
 - **Rule**: Always purge `alsa-utils` (`sudo apt-get purge --auto-remove alsa-utils`) on legacy Debian/Ubuntu server images for the Orange Pi 2G-IOT. Audio is not needed for the TinyTrade terminal, and purging this package completely resolves network-boot freezes.
 
+## Lesson 4: PCF8574 LCD Address Variant & rda_sensor Conflict (May 2026)
+- **Mistake**: Assumed every PCF8574 LCD backpack uses address 0x27 (standard PCF8574) or 0x3F (PCF8574A). The actual device used 0x38 (PCF8574A variant). Also ignored the kernel rda_sensor driver claiming 0x3C.
+- **Consequence**: `i2cdetect` showed no devices at expected addresses. Required unbinding rda_sensor and scanning the full PCF8574A range (0x38-0x3F) to discover the real address.
+- **Rule**: When probing PCF8574 LCDs, check ALL addresses in both ranges (0x20-0x27 for PCF8574, 0x38-0x3F for PCF8574A). Also, account for kernel drivers claiming display addresses (rda_sensor at 0x3C) by unbinding or blacklisting.
+

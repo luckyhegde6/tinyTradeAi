@@ -11,7 +11,11 @@ This project runs on an ultra-low-memory embedded device (Orange Pi 2G-IOT with 
 
 ## Subagents
 Depending on the task, you must assume the persona of a specific subagent. Read their directives in `.agents/subagents/`:
-- `hardware_agent.md`: For OLED, I2C, and OS issues.
+- `hardware_agent.md`: For OLED, LCD, I2C, and Orange Pi OS issues.
+- `i2c_agent.md`: For I2C bus scanning, address conflicts, electrical verification.
+- `ssh_agent.md`: For SSH access, SCP deployment, remote command execution.
+- `session_agent.md`: For tmux session management and persistent terminal work.
+- `test_agent.md`: For test pipelines, verification scripts, regression testing.
 - `data_agent.md`: For fetching from APIs and parsing RSS.
 - `ai_agent.md`: For NLP and Anomaly detection logic.
 - `security_agent.md`: For Zero Trust enforcement and Telegram validation.
