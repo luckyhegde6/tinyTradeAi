@@ -7,7 +7,7 @@ logger = setup_logger("LCD_Driver", log_to_file=True)
 I2C_LCD_KNOWN_ADDRESSES = [0x27, 0x3F, 0x38, 0x39, 0x3E]
 
 
-class PCF8574LCD:
+class PCF8574LCD(object):
     BACKLIGHT_ON = 0x08
     BACKLIGHT_OFF = 0x00
 

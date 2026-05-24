@@ -4,6 +4,7 @@ from utils.helpers import format_price, setup_logger
 
 logger = setup_logger("LCD_Screens", log_to_file=True)
 
+
 def render_crypto_ticker():
     device = get_lcd_device()
     if not device:
@@ -15,14 +16,15 @@ def render_crypto_ticker():
             prc = format_price(btc["price"])
             chg = btc.get("change_24h", 0)
             arr = "^" if chg >= 0 else "v"
-            device.write_line(f"BTC ${prc} {arr}", 0)
+            device.write_line("BTC $%s %s" % (prc, arr), 0)
         if eth:
             prc = format_price(eth["price"])
             chg = eth.get("change_24h", 0)
             arr = "^" if chg >= 0 else "v"
-            device.write_line(f"ETH ${prc} {arr}", 1)
+            device.write_line("ETH $%s %s" % (prc, arr), 1)
     except Exception as e:
         logger.error("Crypto render error: %s", e)
+
 
 def render_stock_ticker():
     device = get_lcd_device()
@@ -33,12 +35,13 @@ def render_stock_ticker():
         bank = get_market_data("NIFTYBANK")
         if nifty:
             prc = format_price(nifty["price"])
-            device.write_line(f"NIFTY {prc}", 0)
+            device.write_line("NIFTY %s" % prc, 0)
         if bank:
             prc = format_price(bank["price"])
-            device.write_line(f"BANK {prc}", 1)
+            device.write_line("BANK %s" % prc, 1)
     except Exception as e:
         logger.error("Stock render error: %s", e)
+
 
 def render_sentiment():
     device = get_lcd_device()
@@ -49,15 +52,16 @@ def render_sentiment():
         if recent:
             item = recent[0]
             label = item["label"]
-            score = item["sentiment_score"]
-            device.write_line(f"AI: {label}", 0)
-            hl = item["headline"][:16] if len(item["headline"]) > 16 else item["headline"]
-            device.write_line(f"{hl}", 1)
+            hl = item["headline"]
+            device.write_line("AI: %s" % label, 0)
+            hl = hl[:16] if len(hl) > 16 else hl
+            device.write_line("%s" % hl, 1)
         else:
             device.write_line("AI Sentiment:", 0)
             device.write_line("No data yet", 1)
     except Exception as e:
         logger.error("Sentiment render error: %s", e)
+
 
 def render_alert():
     device = get_lcd_device()
@@ -67,14 +71,15 @@ def render_alert():
         alerts = get_recent_alerts(1)
         if alerts:
             a = alerts[0]
-            device.write_line(f"! {a['symbol']}", 0)
+            device.write_line("! %s" % a["symbol"], 0)
             msg = a["message"][:16] if len(a["message"]) > 16 else a["message"]
-            device.write_line(f"{msg}", 1)
+            device.write_line("%s" % msg, 1)
         else:
             device.write_line("All nominal", 0)
             device.write_line("No alerts", 1)
     except Exception as e:
         logger.error("Alert render error: %s", e)
+
 
 SCREENS = [
     render_crypto_ticker,
@@ -84,6 +89,7 @@ SCREENS = [
 ]
 
 current_screen_idx = 0
+
 
 def render_next_screen():
     global current_screen_idx

@@ -8,9 +8,10 @@ import time
 
 
 def test_integration():
-    print("\n" + "="*60)
+    sep = "=" * 60
+    print("\n%s" % sep)
     print("LCD Integration Test")
-    print("="*60)
+    print("%s" % sep)
     try:
         print("\n[1/4] Testing singleton pattern...")
         device1 = get_lcd_device()
@@ -25,10 +26,10 @@ def test_integration():
             return False
         print("\n[2/4] Verifying configuration...")
         from config import LCD_I2C_PORT, LCD_I2C_ADDRESS, LCD_COLUMNS, LCD_ROWS
-        print(f"      LCD_I2C_PORT: {LCD_I2C_PORT}")
-        print(f"      LCD_I2C_ADDRESS: 0x{LCD_I2C_ADDRESS:02X}")
-        print(f"      LCD_COLUMNS: {LCD_COLUMNS}")
-        print(f"      LCD_ROWS: {LCD_ROWS}")
+        print("      LCD_I2C_PORT: %d" % LCD_I2C_PORT)
+        print("      LCD_I2C_ADDRESS: 0x%02X" % LCD_I2C_ADDRESS)
+        print("      LCD_COLUMNS: %d" % LCD_COLUMNS)
+        print("      LCD_ROWS: %d" % LCD_ROWS)
         print("      \u2713 Configuration loaded")
         print("\n[3/4] Rendering project content...")
         device1.clear()
@@ -42,16 +43,16 @@ def test_integration():
         print("\n[4/4] Clearing display...")
         device1.clear()
         print("      \u2713 Display cleared")
-        print("\n" + "="*60)
+        print("\n%s" % sep)
         print("\u2713 Integration tests PASSED")
-        print("="*60)
+        print("%s" % sep)
         return True
     except ImportError as e:
-        print(f"\n\u2717 Import Error: {e}")
+        print("\n\u2717 Import Error: %s" % e)
         print("  Check that config.py and lcd/ module exist")
         return False
     except Exception as e:
-        print(f"\n\u2717 Integration Error: {e}")
+        print("\n\u2717 Integration Error: %s" % e)
         return False
 
 

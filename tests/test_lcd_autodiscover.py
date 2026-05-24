@@ -7,79 +7,86 @@ try:
     import smbus
     from lcd.driver import PCF8574LCD, I2C_LCD_KNOWN_ADDRESSES
 except ImportError as e:
-    print(f"Error: Missing dependency: {e}")
-    print("Install with: pip install smbus-cffi")
+    sys.stderr.write("Error: Missing dependency: %s\n" % e)
+    sys.stderr.write("Install with: pip install smbus-cffi\n")
     sys.exit(1)
 
 
 def scan_bus(bus_number=0):
     bus = smbus.SMBus(bus_number)
     found = []
-    print(f"\n{'='*60}")
-    print(f"I2C Bus Scan (Bus {bus_number})")
-    print(f"{'='*60}\n")
+    sep = "=" * 60
+    print("\n%s" % sep)
+    print("I2C Bus Scan (Bus %d)" % bus_number)
+    print("%s\n" % sep)
     print("Scanning I2C addresses 0x03-0x77...\n")
     for addr in range(0x03, 0x78):
         try:
             bus.read_byte(addr)
             found.append(addr)
-            print(f"  \u2713 Found device at 0x{addr:02X}")
+            print("  \u2713 Found device at 0x%02X" % addr)
         except (OSError, IOError):
             pass
     bus.close()
     if not found:
         print("  \u2717 No devices found on I2C bus")
         return []
-    print(f"\n\u2713 Total devices found: {len(found)}")
+    print("\n\u2713 Total devices found: %d" % len(found))
     return found
 
 
 def find_lcd(bus_number, candidates):
     bus = smbus.SMBus(bus_number)
     found_lcds = []
-    search_order = I2C_LCD_KNOWN_ADDRESSES + [a for a in candidates if a not in I2C_LCD_KNOWN_ADDRESSES]
-    print(f"\n{'='*60}")
+    search_order = I2C_LCD_KNOWN_ADDRESSES + [
+        a for a in candidates if a not in I2C_LCD_KNOWN_ADDRESSES
+    ]
+    sep = "=" * 60
+    print("\n%s" % sep)
     print("PCF8574 LCD Identification")
-    print(f"{'='*60}\n")
-    print(f"Testing {len(candidates)} device(s) for PCF8574 LCD...\n")
+    print("%s\n" % sep)
+    print("Testing %d device(s) for PCF8574 LCD...\n" % len(candidates))
     for addr in search_order:
         if addr not in candidates:
             continue
         try:
-            print(f"  Testing 0x{addr:02X}...", end=" ")
+            sys.stdout.write("  Testing 0x%02X... " % addr)
+            sys.stdout.flush()
             lcd = PCF8574LCD(bus, addr, 16, 2)
             lcd.clear()
             lcd.write_line("LCD Test OK", 0)
-            lcd.write_line(f"Addr: 0x{addr:02X}", 1)
+            lcd.write_line("Addr: 0x%02X" % addr, 1)
             lcd.set_backlight(True)
             found_lcds.append(addr)
-            print(f"\u2713 PCF8574 LCD detected!")
-            print(f"      Size: 16x2 | Bus: {bus_number}")
+            print("\u2713 PCF8574 LCD detected!")
+            print("      Size: 16x2 | Bus: %d" % bus_number)
         except Exception:
-            print(f"\u2717 Not PCF8574 LCD (or comm error)")
+            print("\u2717 Not PCF8574 LCD (or comm error)")
     bus.close()
     if not found_lcds:
         print("\n\u2717 No PCF8574 LCD displays found")
         return []
-    print(f"\n\u2713 Total PCF8574 LCD displays found: {len(found_lcds)}")
+    print("\n\u2713 Total PCF8574 LCD displays found: %d" % len(found_lcds))
     return found_lcds
 
 
 def print_config(addresses, bus_number):
-    print(f"\n{'='*60}")
+    sep = "=" * 60
+    print("\n%s" % sep)
     print("Generated Configuration")
-    print(f"{'='*60}\n")
+    print("%s\n" % sep)
     print("Add these to config.py:\n")
     for addr in addresses:
-        print(f"# PCF8574 LCD at address 0x{addr:02X}")
-        print(f"LCD_I2C_PORT = {bus_number}")
-        print(f"LCD_I2C_ADDRESS = 0x{addr:02X}\n")
+        print("# PCF8574 LCD at address 0x%02X" % addr)
+        print("LCD_I2C_PORT = %d" % bus_number)
+        print("LCD_I2C_ADDRESS = 0x%02X\n" % addr)
 
 
 def main():
-    print("\n" + "="*60)
+    sep = "=" * 60
+    print("\n%s" % sep)
     print("I2C PCF8574 LCD Auto-Discovery")
-    print("="*60)
+    print("%s" % sep)
     bus_number = 0
     devices = scan_bus(bus_number)
     if not devices:
@@ -92,16 +99,16 @@ def main():
     if not lcd_addrs:
         print("\n  Other I2C devices present (not PCF8574 LCD):")
         for addr in devices:
-            print(f"    - 0x{addr:02X}")
+            print("    - 0x%02X" % addr)
         return 1
     print_config(lcd_addrs, bus_number)
-    print("="*60)
+    print("%s" % sep)
     print("\u2713 AUTO-DISCOVERY COMPLETE")
-    print("="*60)
+    print("%s" % sep)
     print("\nNext steps:")
     print("  1. Set LCD_I2C_ADDRESS in config.py")
     print("  2. Run: python3 tests/test_lcd_hardware.py")
-    print("="*60 + "\n")
+    print("%s\n" % sep)
     return 0
 
 
