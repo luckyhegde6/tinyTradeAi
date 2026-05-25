@@ -19,7 +19,7 @@ def validate_telegram_request(chat_id):
         
     # Strict string comparison
     if str(chat_id) != str(ALLOWED_CHAT_ID):
-        logger.warning(f"SECURITY BREACH ATTEMPT: Unauthorized chat_id {chat_id} attempted access. Dropping silently.")
+        logger.warning("SECURITY BREACH ATTEMPT: Unauthorized chat_id %s attempted access. Dropping silently." % chat_id)
         return False
         
     return True

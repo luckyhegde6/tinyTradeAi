@@ -5,12 +5,10 @@ schedule>=0.6,<1.2
 Pillow>=5.0,<9.0
 vaderSentiment>=3.0,<4.0
 textblob>=0.15,<0.18
-numpy>=1.13,<1.19
+# Note: numpy is NOT used (replaced with pure Python math for anomaly detection).
 # Note: smbus is provided by system package python3-smbus on Debian.
 # Install via: sudo apt-get install python3-smbus
 # Note: luma.oled is intentionally omitted for Python 3.5 compatibility.
 # The OLED module gracefully returns None if imports fail.
 # Install separately: pip install luma.oled (requires Python 3.6+)
-# 
 # Note: yfinance is intentionally omitted to save memory on 256MB RAM device.
-# We are using direct requests to the NSE India API instead.

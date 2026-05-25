@@ -1,6 +1,6 @@
 import paramiko, os, time
 
-HOST = os.environ.get("SSH_HOST", "192.168.0.11")
+HOST = os.environ.get("SSH_HOST", "192.168.0.8")
 USER = os.environ.get("SSH_USER", "root")
 PASS = os.environ.get("SSH_PASS", "orangepi")
 

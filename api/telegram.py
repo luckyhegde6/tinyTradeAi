@@ -9,14 +9,14 @@ logger = setup_logger("TelegramBot")
 class TinyTradeBot:
     def __init__(self):
         self.token, self.chat_id = get_telegram_credentials()
-        self.api_url = f"https://api.telegram.org/bot{self.token}"
+        self.api_url = "https://api.telegram.org/bot%s" % self.token
         self.last_update_id = 0
         
     def send_message(self, text):
         if not self.token or not self.chat_id:
             return
             
-        url = f"{self.api_url}/sendMessage"
+        url = "%s/sendMessage" % self.api_url
         payload = {
             "chat_id": self.chat_id,
             "text": text,
@@ -25,13 +25,13 @@ class TinyTradeBot:
         try:
             requests.post(url, json=payload, timeout=5)
         except Exception as e:
-            logger.error(f"Failed to send Telegram message: {e}")
+            logger.error("Failed to send Telegram message: %s" % e)
 
     def process_updates(self):
         if not self.token:
             return
             
-        url = f"{self.api_url}/getUpdates?offset={self.last_update_id + 1}&timeout=5"
+        url = "%s/getUpdates?offset=%d&timeout=5" % (self.api_url, self.last_update_id + 1)
         try:
             resp = requests.get(url, timeout=10)
             data = resp.json()
@@ -56,7 +56,7 @@ class TinyTradeBot:
         except requests.exceptions.RequestException:
             pass # Ignore timeout/connection errors during polling
         except Exception as e:
-            logger.error(f"Telegram polling error: {e}")
+            logger.error("Telegram polling error: %s" % e)
 
     def handle_command(self, text):
         if text == "/status":
@@ -70,7 +70,7 @@ class TinyTradeBot:
                 
             msg = "<b>Live Prices:</b>\n"
             for p in prices:
-                msg += f"{p['symbol']}: ${p['price']} ({p['change_24h']:.2f}%)\n"
+                msg += "%s: $%s (%.2f%%)\n" % (p['symbol'], p['price'], p['change_24h'])
             self.send_message(msg)
             
         elif text == "/sentiment":
@@ -81,7 +81,7 @@ class TinyTradeBot:
                 
             msg = "<b>Latest Sentiment:</b>\n"
             for s in sents:
-                msg += f"[{s['label']}] {s['headline'][:40]}...\n"
+                msg += "[%s] %s...\n" % (s['label'], s['headline'][:40])
             self.send_message(msg)
             
         else:
@@ -99,7 +99,7 @@ def get_bot():
 def send_alert_to_telegram(message):
     """Called by anomaly detection to push critical alerts."""
     bot = get_bot()
-    bot.send_message(f"🚨 <b>ALERT</b> 🚨\n{message}")
+    bot.send_message("\U0001F6A8 <b>ALERT</b> \U0001F6A8\n%s" % message)
 
 def poll_telegram():
     """Blocking polling loop to be run in a background thread."""

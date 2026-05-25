@@ -7,55 +7,52 @@ logger = setup_logger("LCD_Init", log_to_file=True)
 
 _device = None
 _device_bus = None
+_init_attempted = False
 
 
-def scan_i2c_bus(bus_number=0):
+def probe_lcd_address(bus_number, addr):
     bus = smbus.SMBus(bus_number)
-    found = []
     try:
-        for addr in range(0x03, 0x78):
-            try:
-                bus.read_byte(addr)
-                found.append(addr)
-            except (OSError, IOError):
-                pass
-    finally:
+        bus.write_byte(addr, 0x08)
         bus.close()
-    return found
+        return True
+    except Exception:
+        try:
+            bus.close()
+        except Exception:
+            pass
+        return False
 
 
 def discover_lcd_address(bus_number=0):
-    found_devices = scan_i2c_bus(bus_number)
-    if not found_devices:
-        logger.warning("No I2C devices found on bus %d", bus_number)
-        return None
-    logger.info("I2C devices found: %s", [hex(a) for a in found_devices])
-    search_order = I2C_LCD_KNOWN_ADDRESSES + [a for a in found_devices if a not in I2C_LCD_KNOWN_ADDRESSES]
-    test_bus = smbus.SMBus(bus_number)
-    try:
-        for addr in search_order:
-            if addr not in found_devices:
-                continue
-            logger.info("Probing LCD at 0x%02X...", addr)
+    for addr in I2C_LCD_KNOWN_ADDRESSES:
+        logger.info("Probing LCD at 0x%02X...", addr)
+        if not probe_lcd_address(bus_number, addr):
+            continue
+        test_bus = smbus.SMBus(bus_number)
+        try:
+            lcd = PCF8574LCD(test_bus, addr, LCD_COLUMNS, LCD_ROWS)
+            lcd.clear()
+            lcd.set_backlight(True)
+            logger.info("LCD discovered at address 0x%02X", addr)
+            test_bus.close()
+            return addr
+        except Exception:
             try:
-                lcd = PCF8574LCD(test_bus, addr, LCD_COLUMNS, LCD_ROWS)
-                lcd.clear()
-                lcd.set_backlight(True)
-                logger.info("LCD discovered at address 0x%02X", addr)
-                return addr
+                test_bus.close()
             except Exception:
-                logger.debug("No LCD at 0x%02X", addr)
-        logger.warning("No PCF8574 LCD found on bus %d", bus_number)
-        return None
-    finally:
-        test_bus.close()
+                pass
+    logger.warning("No PCF8574 LCD found on bus %d", bus_number)
+    return None
 
 
 def get_lcd_device():
-    global _device, _device_bus
+    global _device, _device_bus, _init_attempted
 
     if _device is not None:
         return _device
+    if _init_attempted:
+        return None
 
     try:
         if LCD_I2C_ADDRESS != 0x00:
@@ -66,6 +63,7 @@ def get_lcd_device():
             addr = discover_lcd_address(LCD_I2C_PORT)
             if addr is None:
                 logger.warning("No LCD found. Running headless.")
+                _init_attempted = True
                 return None
             logger.info("Auto-discovered LCD at 0x%02X", addr)
 
@@ -85,5 +83,57 @@ def get_lcd_device():
                 pass
             _device_bus = None
         _device = None
+        _init_attempted = True
 
     return _device
+
+
+def reset_lcd_device():
+    global _device, _device_bus, _init_attempted
+
+    if _device is not None:
+        try:
+            _device.clear()
+            _device.set_backlight(False)
+            _device.close()
+        except Exception:
+            pass
+    if _device_bus is not None:
+        try:
+            _device_bus.close()
+        except Exception:
+            pass
+
+    _device = None
+    _device_bus = None
+    _init_attempted = False
+    logger.info("LCD device reset (will re-init on next access)")
+
+
+def clear_lcd():
+    device = get_lcd_device()
+    if not device:
+        return False
+    try:
+        device.clear()
+        logger.info("LCD cleared")
+        return True
+    except Exception as e:
+        logger.error("LCD clear failed: %s", e)
+        return False
+
+
+def test_lcd():
+    device = get_lcd_device()
+    if not device:
+        return False
+    try:
+        device.clear()
+        device.set_backlight(True)
+        device.write_line("LCD TEST", 0)
+        device.write_line("TinyTrade AI", 1)
+        logger.info("LCD test pattern displayed")
+        return True
+    except Exception as e:
+        logger.error("LCD test failed: %s", e)
+        return False

@@ -52,8 +52,8 @@ class PCF8574LCD(object):
         self.rows = rows
         self.backlight = self.BACKLIGHT_ON
         self.displaycontrol = self.LCD_DISPLAYON | self.LCD_CURSOROFF | self.LCD_BLINKOFF
-        self._write_byte(0x00)
-        time.sleep(0.05)
+        self._write_byte(self.backlight)
+        time.sleep(0.10)
         self._init_lcd()
 
     def _write_byte(self, byte):
@@ -62,45 +62,51 @@ class PCF8574LCD(object):
     def _strobe(self, data):
         combined = data | self.LCD_E | self.backlight
         self._write_byte(combined)
-        time.sleep(0.0005)
+        time.sleep(0.005)
         self._write_byte(combined & ~self.LCD_E)
-        time.sleep(0.0001)
+        time.sleep(0.005)
 
     def _send_nibble(self, nibble, rs_mode):
         self._strobe(((nibble << 4) & 0xF0) | rs_mode)
 
     def _send_byte(self, byte, rs_mode):
         self._strobe((byte & 0xF0) | rs_mode)
+        time.sleep(0.005)
         self._strobe(((byte << 4) & 0xF0) | rs_mode)
 
     def _write_cmd(self, cmd):
         self._send_byte(cmd, 0x00)
+        time.sleep(0.005)
 
     def _write_data(self, data):
         self._send_byte(data, self.LCD_RS)
 
     def _init_lcd(self):
         self._send_nibble(0x03, 0x00)
+        time.sleep(0.010)
+        self._send_nibble(0x03, 0x00)
         time.sleep(0.005)
         self._send_nibble(0x03, 0x00)
-        time.sleep(0.0001)
-        self._send_nibble(0x03, 0x00)
-        time.sleep(0.0001)
+        time.sleep(0.005)
         self._send_nibble(0x02, 0x00)
-        time.sleep(0.0001)
+        time.sleep(0.010)
         self._write_cmd(self.LCD_FUNCTIONSET | self.LCD_2LINE | self.LCD_5x8DOTS)
+        time.sleep(0.005)
         self._write_cmd(self.LCD_DISPLAYCONTROL | self.displaycontrol)
+        time.sleep(0.005)
         self.clear()
+        time.sleep(0.005)
         self._write_cmd(self.LCD_ENTRYMODESET | self.LCD_ENTRYLEFT | self.LCD_ENTRYSHIFTDECREMENT)
+        time.sleep(0.005)
         self.display(True)
 
     def clear(self):
         self._write_cmd(self.LCD_CLEARDISPLAY)
-        time.sleep(0.002)
+        time.sleep(0.005)
 
     def home(self):
         self._write_cmd(self.LCD_RETURNHOME)
-        time.sleep(0.002)
+        time.sleep(0.005)
 
     def display(self, on=True):
         ctrl = self.LCD_DISPLAYON if on else self.LCD_DISPLAYOFF

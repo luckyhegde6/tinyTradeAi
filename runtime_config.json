@@ -1,0 +1,8 @@
+{
+  "crypto_poll_interval": 60,
+  "stocks_poll_interval": 900,
+  "news_poll_interval": 900,
+  "screen_rotation_interval": 5,
+  "oled_enabled": true,
+  "lcd_enabled": false
+}

@@ -1,4 +1,4 @@
-import numpy as np
+import math
 from collections import deque
 from database.db import get_market_data, insert_alert
 from utils.helpers import setup_logger
@@ -24,10 +24,11 @@ def track_price_and_detect_anomaly(symbol, current_price):
     if len(history) < 10:
         return False, None
         
-    # Calculate mean and standard deviation
-    arr = np.array(history)
-    mean = np.mean(arr)
-    std_dev = np.std(arr)
+    # Calculate mean and standard deviation (pure Python, no numpy needed)
+    n = len(history)
+    mean = sum(history) / n
+    variance = sum((x - mean) ** 2 for x in history) / n
+    std_dev = math.sqrt(variance)
     
     if std_dev == 0:
         return False, None
@@ -42,13 +43,13 @@ def track_price_and_detect_anomaly(symbol, current_price):
     
     if is_anomaly:
         direction = "SPIKE" if z_score > 0 else "CRASH"
-        message = f"{symbol} price {direction}! Z-Score: {z_score:.2f} (Current: {current_price}, Mean: {mean:.2f})"
+        message = "%s price %s! Z-Score: %.2f (Current: %s, Mean: %.2f)" % (symbol, direction, z_score, current_price, mean)
         
         # Avoid duplicate alerts in a short span by checking the last value (naive approach)
         # More robust approach would track alert timestamps
         insert_alert(symbol, "VOLATILITY", message)
-        logger.warning(f"ANOMALY DETECTED: {message}")
-        send_alert_to_telegram(f"Volatility Anomaly: {message}")
+        logger.warning("ANOMALY DETECTED: %s" % message)
+        send_alert_to_telegram("Volatility Anomaly: %s" % message)
         
     return is_anomaly, z_score
 

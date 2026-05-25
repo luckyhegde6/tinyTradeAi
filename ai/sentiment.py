@@ -45,4 +45,4 @@ def process_news_sentiment():
         score, label = analyze_sentiment(headline)
         
         insert_sentiment(source, headline, score, label)
-        logger.info(f"Sentiment: {label} ({score:.2f}) - {headline[:50]}...")
+        logger.info("Sentiment: %s (%.2f) - %s..." % (label, score, headline[:50]))
