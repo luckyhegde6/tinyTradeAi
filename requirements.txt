@@ -1,10 +1,32 @@
-flask>=0.12,<2.0
-requests>=2.18,<2.26
-python-dotenv>=0.10,<1.0
+flask>=1.1.4,<2.0
+requests>=2.25.1,<2.26
+python-dotenv>=0.21.0,<1.0
 schedule>=0.6,<1.2
-Pillow>=5.0,<9.0
+Pillow>=8.4.0,<9.0
 vaderSentiment>=3.0,<4.0
 textblob>=0.15,<0.18
+
+# ========== SECURITY NOTE: Python 3.5 ==========
+# The Orange Pi runs Python 3.5.3 (Debian Stretch). ALL 8 Dependabot CVEs
+# require package versions that dropped Python 3.5 support:
+#
+#   #1 Pillow buffer overflow (HIGH)    — fixed in 10.x → needs Python 3.6+
+#   #2 Requests Session verify=False     — fixed in 2.32.x → needs Python 3.7+
+#   #3 Requests .netrc credential leak   — fixed in 2.32.x → needs Python 3.7+
+#   #4 Flask Vary: Cookie header (LOW)   — fixed in 2.x → needs Python 3.6+
+#   #5 Requests temp file reuse (CVE-2026-25645) — fixed in 2.33.x → needs Python 3.8+
+#   #6 python-dotenv symlink (CVE-2026-28684)   — fixed in 1.2.2 → needs Python 3.8+
+#   #7 Pillow integer overflow (fonts)   — fixed in 9.x → needs Python 3.6+
+#   #8 Pillow PDF infinite loop (DoS)    — fixed in 9.x → needs Python 3.6+
+#
+# None are exploitable in practice because we don't use the affected APIs:
+#   - No PCX/SGI/PDF parsing in Pillow
+#   - No verify=False or .netrc in requests
+#   - No python-dotenv set_key() usage (config_manager.py does manual JSON writes)
+#   - Flask Vary: Cookie header issue only affects caching proxies
+#
+# To fix these properly, upgrade Python on the Orange Pi (see docs/python-upgrade.md).
+# ==============================================
 # Note: numpy is NOT used (replaced with pure Python math for anomaly detection).
 # Note: smbus is provided by system package python3-smbus on Debian.
 # Install via: sudo apt-get install python3-smbus

@@ -25,6 +25,9 @@ This file serves as the long-term memory for AI agents working on TinyTrade AI. 
 ## Active Blockers
 - **LCD PCF8574 at 0x38**: Non-responsive (no ACK). Physical connection likely bad or backpack lost power between sessions.
 - **pip install timeout** on 256MB/1GHz device — individual background installs with nohup work.
+- **Python 3.5.3 blocks security fixes**: All 8 Dependabot CVEs require package versions that dropped Python 3.5 support. Fix requires upgrading to Python 3.7+ via backports, compilation, or OS upgrade to Debian 10. See `docs/python-upgrade.md`.
+
+## Resolved Blockers
 
 ## Resolved Blockers
 - **rda_sensor rebinds to 0x3C on every boot**: Now handled by startup.sh with 1s settle delay, systemd tinytrade.service with `Before=rc-local.service`, and fallback in rc.local.
