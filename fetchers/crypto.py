@@ -29,7 +29,7 @@ def fetch_crypto_prices():
             elif symbol == "solana": display_symbol = "SOL"
             
             update_market_data(display_symbol, price, change)
-            logger.info(f"Updated {display_symbol}: ${price} ({change:.2f}%)")
+            logger.info("Updated %s: $%s (%.2f%%)" % (display_symbol, price, change))
             
     except Exception as e:
-        logger.error(f"Error fetching crypto prices: {e}")
+        logger.error("Error fetching crypto prices: %s" % e)

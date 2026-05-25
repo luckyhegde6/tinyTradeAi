@@ -11,28 +11,36 @@ class SSD1306:
     
     def _init_display(self):
         """Initialize SSD1306"""
-        cmds = [0xAE, 0x00, 0x10, 0x40, 0xB0, 0x81, 0xFF, 0xA1, 0xA6, 0xA8, 0x3F, 0xD3, 0x00, 0xD5, 0x80, 0xD9, 0xF1, 0xDA, 0x12, 0xDB, 0x40, 0x8D, 0x14, 0xAF]
+        cmds = [0xAE, 0xD5, 0x80, 0xA8, 0x3F, 0xD3, 0x00, 0x40, 0x8D, 0x14, 0x20, 0x00, 0xA1, 0xC8, 0xDA, 0x12, 0x81, 0xCF, 0xD9, 0xF1, 0xDB, 0x40, 0xA4, 0xA6, 0xAF]
         for cmd in cmds:
-            self.bus.write_byte(self.addr, cmd)
+            self.bus.write_byte_data(self.addr, 0x00, cmd)
     
     def display_image(self, pil_image):
-        """Display PIL Image on OLED"""
+        """Display PIL Image on OLED (converts row-major to SSD1306 page format)"""
         if pil_image.size != (self.width, self.height):
             pil_image = pil_image.resize((self.width, self.height))
         
-        buf = pil_image.tobytes()
+        pixels = pil_image.load()
         for page in range(8):
             self.bus.write_byte_data(self.addr, 0x00, (0xB0 + page))
             self.bus.write_byte_data(self.addr, 0x00, 0x00)
             self.bus.write_byte_data(self.addr, 0x00, 0x10)
             
             for col in range(self.width):
-                self.bus.write_byte(self.addr, buf[page * self.width + col])
+                byte = 0
+                for bit in range(8):
+                    if pixels[col, page * 8 + bit] > 0:
+                        byte |= (1 << bit)
+                self.bus.write_byte_data(self.addr, 0x40, byte)
     
     def clear(self):
         """Clear display"""
         blank = Image.new('1', (self.width, self.height), 0)
         self.display_image(blank)
+
+    def display(self, image):
+        """Luma-compatible display method - takes PIL Image and shows it"""
+        self.display_image(image)
 
 # Usage example
 if __name__ == "__main__":

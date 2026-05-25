@@ -32,6 +32,6 @@ def fetch_rss_headlines():
                     count += 1
                     
         except Exception as e:
-            logger.error(f"Error fetching RSS {feed_url}: {e}")
+            logger.error("Error fetching RSS %s: %s" % (feed_url, e))
             
     return headlines

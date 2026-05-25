@@ -1,0 +1,11 @@
+#!/bin/sh -e
+# rc.local - TinyTrade Orange Pi boot-time hardware fixups
+#
+# The tinytrade.service startup.sh handles rda_sensor unbind before
+# launching main.py. This rc.local is a fallback to ensure the I2C
+# address is free even if the service fails to start.
+#
+# Duplicate unbind is intentional (harmless idempotent operation):
+echo 0-003c > /sys/bus/i2c/drivers/rda-sensor/unbind 2>/dev/null || true
+
+exit 0
